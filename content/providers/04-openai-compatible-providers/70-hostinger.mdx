@@ -1,0 +1,109 @@
+---
+title: Hostinger AI Router
+description: Use the Hostinger AI Router OpenAI-compatible API with the AI SDK.
+---
+
+# Hostinger AI Router Provider
+
+[Hostinger AI Router](https://www.hostinger.com/ai-router) provides access to models from multiple AI providers through one OpenAI-compatible API endpoint. It lets you change models without changing SDKs or managing a separate API key for each model.
+
+This is a documentation-only integration: use the AI SDK's existing `@ai-sdk/openai-compatible` package; no Hostinger-specific package is required.
+
+## Setup
+
+Install the OpenAI Compatible provider:
+
+<InstallPackages packages="@ai-sdk/openai-compatible" />
+
+Create an API key in **Hostinger hPanel → AI Router → API keys** and set it as a server-side environment variable:
+
+```bash
+export HOSTINGER_AI_ROUTER_API_KEY=your-api-key
+```
+
+Keep the key private. It provides access to your Hostinger AI Router credit balance.
+
+## Provider Instance
+
+Create a Hostinger AI Router provider instance with `createOpenAICompatible`:
+
+```ts
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+
+const hostinger = createOpenAICompatible({
+  name: 'hostinger-ai-router',
+  apiKey: process.env.HOSTINGER_AI_ROUTER_API_KEY,
+  baseURL: 'https://router.hostinger.com/v1',
+});
+```
+
+The `apiKey` option sends the key as a Bearer token in the `Authorization` header.
+
+## Language Models
+
+Pass a model ID shown in **Hostinger hPanel → AI Router → Models**:
+
+```ts
+const model = hostinger('MODEL_ID');
+```
+
+Model IDs and availability can change. Copy the exact current ID from hPanel rather than hard-coding an example from this page.
+
+### Generate Text
+
+```ts
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+import { generateText } from 'ai';
+
+const hostinger = createOpenAICompatible({
+  name: 'hostinger-ai-router',
+  apiKey: process.env.HOSTINGER_AI_ROUTER_API_KEY,
+  baseURL: 'https://router.hostinger.com/v1',
+});
+
+const { text } = await generateText({
+  model: hostinger('MODEL_ID'),
+  prompt: 'Explain what an AI model router does in one sentence.',
+});
+
+console.log(text);
+```
+
+### Stream Text
+
+```ts
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+import { streamText } from 'ai';
+
+const hostinger = createOpenAICompatible({
+  name: 'hostinger-ai-router',
+  apiKey: process.env.HOSTINGER_AI_ROUTER_API_KEY,
+  baseURL: 'https://router.hostinger.com/v1',
+});
+
+const result = streamText({
+  model: hostinger('MODEL_ID'),
+  prompt: 'Count from 1 to 5, separated by spaces.',
+});
+
+for await (const textPart of result.textStream) {
+  process.stdout.write(textPart);
+}
+```
+
+## Supported Models and Capabilities
+
+Hostinger documents compatibility with the OpenAI API and exposes models from multiple providers. Text generation, streaming, tool calling, structured output, vision, and other capabilities depend on the selected model and the router's current compatibility. Consult the model details in hPanel before relying on a capability in production.
+
+## Billing and Credits
+
+Hostinger AI Router uses usage-based Hostinger AI credits. Credit costs vary by model and request. For budgeting examples, this guide uses the conversion **1 credit = $0.01**; verify the current credit price and model rates in hPanel before estimating production spend, because Hostinger pricing and model availability may change.
+
+You can set per-key daily and monthly spending limits and monitor usage by model and key in hPanel. The balance is shared with other Hostinger AI products connected to the account.
+
+## Resources
+
+- [Hostinger AI Router](https://www.hostinger.com/ai-router)
+- [What is Hostinger AI Router and how to get started](https://www.hostinger.com/support/what-is-hostinger-ai-router-and-how-to-get-started/)
+- [Hostinger AI Router dashboard](https://hpanel.hostinger.com/ai-router)
+- [AI SDK OpenAI Compatible provider](/providers/openai-compatible-providers)
